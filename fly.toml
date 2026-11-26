@@ -1,8 +1,8 @@
 # Fly.io config for the Vinted deal finder.
 # Set the secret before (or right after) the first deploy:
 #   fly secrets set VINTED_MCP_SECRET=$(python3 -c "import secrets; print(secrets.token_urlsafe(32))")
-app = "vinted-deals-154730"
-primary_region = "lhr"
+app = "vinted-mcp"
+primary_region = "iad"
 
 [build]
   dockerfile = "Dockerfile"
@@ -20,6 +20,7 @@ primary_region = "lhr"
   initial_size = "1gb"
 
 [http_service]
+  # Must match PORT above.
   internal_port = 8000
   force_https = true
   # Sleep when idle and wake on the next request, so it costs almost nothing.
