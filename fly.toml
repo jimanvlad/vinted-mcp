@@ -1,33 +1,32 @@
-# Fly.io config for the Vinted deal finder.
-# Set the secret before (or right after) the first deploy:
-#   fly secrets set VINTED_MCP_SECRET=$(python3 -c "import secrets; print(secrets.token_urlsafe(32))")
-app = "vinted-mcp"
-primary_region = "iad"
+# fly.toml app configuration file generated for vinted-mcp on 2026-11-26T17:35:31Z
+#
+# See https://docs.fly.io/reference/configuration for information about how to use this file.
+#
+
+app = 'vinted-mcp'
+primary_region = 'iad'
 
 [build]
-  dockerfile = "Dockerfile"
+  dockerfile = 'Dockerfile'
 
 [env]
-  VINTED_MCP_TRANSPORT = "http"
-  PORT = "8000"
-  VINTED_WISHLIST_PATH = "/data/wishlist.json"
-  VINTED_DOMAIN = "www.vinted.co.uk"
+  PORT = '8000'
+  VINTED_DOMAIN = 'www.vinted.co.uk'
+  VINTED_MCP_TRANSPORT = 'http'
+  VINTED_WISHLIST_PATH = '/data/wishlist.json'
 
-# Keeps the shopping list across restarts and deploys.
 [[mounts]]
-  source = "vinted_data"
-  destination = "/data"
-  initial_size = "1gb"
+  source = 'vinted_data'
+  destination = '/data'
+  initial_size = '1gb'
 
 [http_service]
-  # Must match PORT above.
-  internal_port = 8000
+  internal_port = 8000  # must match PORT
   force_https = true
-  # Sleep when idle and wake on the next request, so it costs almost nothing.
-  auto_stop_machines = "stop"
+  auto_stop_machines = 'stop'
   auto_start_machines = true
   min_machines_running = 0
 
 [[vm]]
-  size = "shared-cpu-1x"
-  memory = "256mb"
+  size = 'shared-cpu-1x'
+  memory = '256mb'
