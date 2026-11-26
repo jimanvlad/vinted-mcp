@@ -25,6 +25,7 @@ class WishlistItem:
     exclude_words: list[str] = field(default_factory=list)
     notes: str = ""
     match_all_words: bool = True
+    mens_only: bool = False
 
     @property
     def slug(self) -> str:

@@ -30,6 +30,18 @@ Filters:
 `total_price` is the seller's price plus Vinted's buyer protection fee. Postage is not
 included, so expect roughly £2.50–£5 on top.
 
+## Without MCP (command line)
+
+The same search works as a plain command, which is handy in any Claude Code session
+opened on this repo (including Claude Code in the Claude mobile app). `CLAUDE.md` tells
+Claude how to use it, and the shopping list is `wishlist.json` in the repo root.
+
+```bash
+uv run vinted check
+uv run vinted deals "patagonia r1 air" --new-price 84 --size L --min-condition "very good" --mens
+uv run vinted list
+```
+
 ## Install
 
 Needs [uv](https://docs.astral.sh/uv/) (or Python 3.10+ and pip).

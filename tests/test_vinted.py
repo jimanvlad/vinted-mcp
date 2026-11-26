@@ -182,3 +182,22 @@ def test_match_all_words_drops_off_target_listings(fake):
     out = call("find_deals", {"query": "patagonia r1-air", "new_price": 84, "sizes": ["L"],
                               "match_all_words": False})
     assert out["deals"][0]["id"] == 7
+
+
+def test_mens_only_drops_womens_sizes_and_titles(fake):
+    extra = [raw_item(8, "R1 Air ladies fleece", 20.0, 21.5, "Patagonia", "L · Very good")]
+    fake.listings.extend(parse_catalog_html(catalog_html(extra), BASE))
+    out = call("find_deals", {"query": "r1 air", "new_price": 84, "sizes": ["L"], "mens_only": True})
+    ids = [d["id"] for d in out["deals"]]
+    assert 4 not in ids and 8 not in ids  # "L / UK 12-14" and "ladies"
+    assert 1 in ids
+
+
+def test_cli_check(fake, tmp_path, capsys):
+    from vinted_mcp import cli
+    wl = tmp_path / "wl.json"
+    wl.write_text(json.dumps({"items": [{"name": "R1", "query": "r1 air", "new_price": 84,
+                                         "sizes": ["L"], "mens_only": True}]}))
+    assert cli.main(["--wishlist", str(wl), "check"]) == 0
+    out = capsys.readouterr().out
+    assert "Patagonia R1 Air half zip black" in out and "save £41.30" in out

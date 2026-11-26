@@ -14,6 +14,7 @@ from .vinted import (
     VintedClient,
     VintedError,
     condition_at_least,
+    looks_womens,
     matches_all_words,
     size_matches,
     text_excludes,
@@ -62,6 +63,7 @@ def _collect(
     limit: int,
     pages: int,
     match_all_words: bool = True,
+    mens_only: bool = False,
 ) -> tuple[list[Listing], int]:
     """Search up to `pages` result pages and filter locally. Returns (matches, scanned)."""
     matches: list[Listing] = []
@@ -85,6 +87,8 @@ def _collect(
             if text_excludes(item, exclude_words):
                 continue
             if match_all_words and not matches_all_words(item, query):
+                continue
+            if mens_only and looks_womens(item):
                 continue
             matches.append(item)
         if len(matches) >= limit:
@@ -115,6 +119,7 @@ def search_vinted(
     limit: int = 20,
     pages: int = 1,
     match_all_words: bool = True,
+    mens_only: bool = False,
 ) -> dict[str, Any]:
     """Search Vinted listings.
 
@@ -132,12 +137,14 @@ def search_vinted(
             size or condition filters remove most results.
         match_all_words: Keep only listings whose title or brand contains every word of
             the query (default true). Turn off for broad searches.
+        mens_only: Drop women's listings (sizes like "M / UK 12-14", or "women"/"ladies"
+            in the title).
     """
     try:
         matches, scanned = _collect(
             query, sizes=sizes, min_condition=min_condition, min_price=min_price,
             max_price=max_price, exclude_words=exclude_words, sort=sort,
-            limit=limit, pages=pages, match_all_words=match_all_words,
+            limit=limit, pages=pages, match_all_words=match_all_words, mens_only=mens_only,
         )
     except (VintedError, ValueError) as exc:
         return {"error": str(exc)}
@@ -160,6 +167,7 @@ def find_deals(
     limit: int = 10,
     pages: int = 2,
     match_all_words: bool = True,
+    mens_only: bool = False,
 ) -> dict[str, Any]:
     """Find Vinted listings well below the new retail price, best saving first.
 
@@ -175,6 +183,8 @@ def find_deals(
         pages: Result pages to scan (max 3).
         match_all_words: Keep only listings whose title or brand contains every word of
             the query (default true). Turn off for broad searches.
+        mens_only: Drop women's listings (sizes like "M / UK 12-14", or "women"/"ladies"
+            in the title).
     """
     if new_price <= 0:
         return {"error": "new_price must be positive"}
@@ -183,7 +193,7 @@ def find_deals(
             query, sizes=sizes, min_condition=min_condition, min_price=None,
             max_price=round(new_price * max_fraction_of_new, 2),
             exclude_words=exclude_words, sort="relevance", limit=limit * 3, pages=pages,
-            match_all_words=match_all_words,
+            match_all_words=match_all_words, mens_only=mens_only,
         )
     except (VintedError, ValueError) as exc:
         return {"error": str(exc)}
@@ -223,10 +233,11 @@ def check_wishlist(name: str | None = None, per_item: int = 5) -> dict[str, Any]
                 item.query, sizes=item.sizes or None, min_condition=item.min_condition,
                 min_price=None, max_price=cap, exclude_words=item.exclude_words or None,
                 sort="relevance", limit=per_item * 3, pages=2,
-                match_all_words=item.match_all_words,
+                match_all_words=item.match_all_words, mens_only=item.mens_only,
             )
         except (VintedError, ValueError) as exc:
-            results.append({"name": item.name, "error": str(exc)})
+            results.append({"name": item.name, "new_price": item.new_price,
+                            "sizes": item.sizes, "error": str(exc)})
             continue
         results.append(
             {
@@ -264,6 +275,7 @@ def add_to_wishlist(
     exclude_words: list[str] | None = None,
     notes: str = "",
     match_all_words: bool = True,
+    mens_only: bool = False,
 ) -> dict[str, Any]:
     """Add an item to the shopping list, or update it if the name already exists.
     This only changes a local file; nothing is sent to Vinted.
@@ -278,6 +290,8 @@ def add_to_wishlist(
         exclude_words: Words that mark wrong listings, e.g. ["women", "kids"].
         notes: Anything else worth remembering.
         match_all_words: Require every query word in the listing title or brand.
+        mens_only: Drop women's listings (sizes like "M / UK 12-14", or "women"/"ladies"
+            in the title).
     """
     if min_condition and min_condition.lower() not in CONDITIONS:
         return {"error": f"min_condition must be one of: {', '.join(CONDITIONS)}"}
@@ -285,7 +299,7 @@ def add_to_wishlist(
         name=name, query=query, new_price=new_price, sizes=sizes or [],
         min_condition=min_condition, max_price=max_price,
         exclude_words=exclude_words or [], notes=notes,
-        match_all_words=match_all_words,
+        match_all_words=match_all_words, mens_only=mens_only,
     )
     replaced = _wishlist.upsert(item)
     return {"status": "updated" if replaced else "added", "item": vars(item)}

@@ -212,6 +212,18 @@ def matches_all_words(listing: Listing, query: str) -> bool:
     return all(w in hay for w in words if w)
 
 
+_WOMENS_WORDS = ("women", "womens", "woman", "ladies", "lady", "girls", "girl")
+
+
+def looks_womens(listing: Listing) -> bool:
+    """Heuristic: Vinted shows women's letter sizes with a UK dress size ("M / UK 12-14"),
+    and men's as just the letter. Also catches women's words in the title."""
+    if listing.size and "/ uk" in listing.size.lower():
+        return True
+    words = re.findall(r"[a-z]+", listing.title.lower())
+    return any(w in _WOMENS_WORDS for w in words)
+
+
 def text_excludes(listing: Listing, exclude: list[str] | None) -> bool:
     if not exclude:
         return False
