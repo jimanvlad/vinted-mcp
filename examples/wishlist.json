@@ -1,0 +1,37 @@
+{
+  "items": [
+    {
+      "name": "Patagonia R1 Air fleece",
+      "query": "patagonia r1 air",
+      "new_price": 84.0,
+      "sizes": ["L"],
+      "min_condition": "very good",
+      "max_price": null,
+      "exclude_words": ["women", "womens", "kids"],
+      "notes": "Half zip, crew or zip neck all fine.",
+      "match_all_words": true
+    },
+    {
+      "name": "Icebreaker merino base layer",
+      "query": "icebreaker merino long sleeve",
+      "new_price": 56.99,
+      "sizes": ["M"],
+      "min_condition": "good",
+      "max_price": 35.0,
+      "exclude_words": ["women", "womens", "leggings"],
+      "notes": "Want two. 200 Oasis weight preferred.",
+      "match_all_words": true
+    },
+    {
+      "name": "Snow boots",
+      "query": "north face snow boots",
+      "new_price": 87.5,
+      "sizes": ["10"],
+      "min_condition": "very good",
+      "max_price": null,
+      "exclude_words": ["women", "womens", "kids"],
+      "notes": "Only worth it in my size.",
+      "match_all_words": true
+    }
+  ]
+}
